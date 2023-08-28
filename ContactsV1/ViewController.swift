@@ -10,10 +10,10 @@ import UIKit
 class ViewController: UIViewController {
     //свяжем сцену и созданную модель Contact. Свойство contacts – это массив контактов, элементы которого будут выведены в табличном представлении. При загрузке сцены данное свойство будет наполняться данными, а впоследствии использоваться для наполнения ячеек таблицы данными.
     private var contacts = Contact.info
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // Do any additional setup after loading the view.
     }
 }
@@ -25,7 +25,7 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //        версия 1
         var cell: UITableViewCell
-        
+
         if let reuseCell = tableView.dequeueReusableCell(withIdentifier: "MyCell") {
             print("Используем старую ячейку для строки с индексом \(indexPath.row)")
             cell = reuseCell
@@ -36,7 +36,7 @@ extension ViewController: UITableViewDataSource {
         configure(cell: cell, for: indexPath)
         return cell
     }
-    
+
     private func configure(cell: UITableViewCell, for indexPath: IndexPath) {
         var configuration = cell.defaultContentConfiguration()
         configuration.text = contacts[indexPath.row].name
