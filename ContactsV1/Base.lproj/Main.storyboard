@@ -30,6 +30,9 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="Kgy-nK-HrT"/>
                                     <barButtonItem title="Создать контакт" id="yzv-KU-fSY">
                                         <color key="tintColor" systemColor="systemBlueColor"/>
+                                        <connections>
+                                            <action selector="showNewContactAlert" destination="BYZ-38-t0r" id="s0M-e7-bxh"/>
+                                        </connections>
                                     </barButtonItem>
                                 </items>
                             </toolbar>
@@ -46,6 +49,9 @@
                             <constraint firstItem="rgw-wh-IPd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="I27-rm-MMG"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="tableView" destination="rgw-wh-IPd" id="0xB-bG-VWf"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

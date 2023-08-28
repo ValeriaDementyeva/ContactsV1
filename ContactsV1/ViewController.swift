@@ -9,11 +9,49 @@ import UIKit
 
 class ViewController: UIViewController {
     //свяжем сцену и созданную модель Contact. Свойство contacts – это массив контактов, элементы которого будут выведены в табличном представлении. При загрузке сцены данное свойство будет наполняться данными, а впоследствии использоваться для наполнения ячеек таблицы данными.
-    private var contacts = Contact.info
-
+    private var contacts = Contact.info {
+        didSet {
+            contacts.sort{ $0.name < $1.name }
+        }
+    }
+    
+    @IBOutlet var tableView: UITableView!
+    @IBAction func showNewContactAlert() {
+        // создание Alert Controller
+        let alertController = UIAlertController(title: "Создайте новый контакт", message: "Введите имя и телефон", preferredStyle: .alert)
+        // добавляем первое текстовое поле в Alert Controller
+        alertController.addTextField { textField in
+            textField.placeholder = "Имя"
+        }
+        // добавляем второе текстовое поле в Alert Controller
+        alertController.addTextField { textField in
+            textField.placeholder = "Номер телефона"
+        }
+        // создаем кнопки
+        // кнопка создания контакта
+        let createButton = UIAlertAction(title: "Создать", style: .default) { [self] _ in
+            guard let contactName = alertController.textFields?[0].text, let contactPhone = alertController.textFields?[1].text else {
+                return
+            }
+            // создаем новый контакт
+            let contact = Contact(name: contactName, phone: contactPhone)
+            self.contacts.append(contact)
+            tableView.reloadData()
+        }
+        // кнопка отмены
+        let cancelButton = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        // добавляем кнопки в Alert Controller
+        alertController.addAction(cancelButton)
+        alertController.addAction(createButton)
+        // отображаем Alert Controller
+        present(alertController, animated: true, completion: nil)
+        
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
     }
 }
@@ -25,7 +63,7 @@ extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //        версия 1
         var cell: UITableViewCell
-
+        
         if let reuseCell = tableView.dequeueReusableCell(withIdentifier: "MyCell") {
             print("Используем старую ячейку для строки с индексом \(indexPath.row)")
             cell = reuseCell
@@ -36,7 +74,7 @@ extension ViewController: UITableViewDataSource {
         configure(cell: cell, for: indexPath)
         return cell
     }
-
+    
     private func configure(cell: UITableViewCell, for indexPath: IndexPath) {
         var configuration = cell.defaultContentConfiguration()
         configuration.text = contacts[indexPath.row].name
