@@ -9,11 +9,16 @@ import UIKit
 
 class ViewController: UIViewController {
     //свяжем сцену и созданную модель Contact. Свойство contacts – это массив контактов, элементы которого будут выведены в табличном представлении. При загрузке сцены данное свойство будет наполняться данными, а впоследствии использоваться для наполнения ячеек таблицы данными.
-    private var contacts = Contact.info {
+    var contacts: [ContactProtocol] = [] {
         didSet {
-            contacts.sort{ $0.name < $1.name }
+            contacts.sort{ $0.name < $1.name
+            }
+            // сохранение контактов в хранилище
+            storage.save(contacts: contacts)
         }
     }
+
+    var storage: ContactStorageProtocol!
     
     @IBOutlet var tableView: UITableView!
     @IBAction func showNewContactAlert() {
@@ -27,6 +32,7 @@ class ViewController: UIViewController {
         alertController.addTextField { textField in
             textField.placeholder = "Номер телефона"
         }
+
         // создаем кнопки
         // кнопка создания контакта
         let createButton = UIAlertAction(title: "Создать", style: .default) { [self] _ in
@@ -34,10 +40,21 @@ class ViewController: UIViewController {
                 return
             }
             // создаем новый контакт
-            let contact = Contact(name: contactName, phone: contactPhone)
-            self.contacts.append(contact)
-            tableView.reloadData()
+            // Проверка валидности номера телефона
+            if isValidPhoneNumber(phoneNumber: contactPhone) {
+                // создаем новый контакт
+                let contact = Contact(name: contactName, phone: contactPhone)
+                self.contacts.append(contact)
+                tableView.reloadData()
+            } else {
+                // Вывод сообщения об ошибке невалидного номера телефона
+                let errorAlert = UIAlertController(title: "Ошибка", message: "Введите корректный номер телефона", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                errorAlert.addAction(okAction)
+                present(errorAlert, animated: true, completion: nil)
+            }
         }
+
         // кнопка отмены
         let cancelButton = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
         // добавляем кнопки в Alert Controller
@@ -45,17 +62,30 @@ class ViewController: UIViewController {
         alertController.addAction(createButton)
         // отображаем Alert Controller
         present(alertController, animated: true, completion: nil)
+
+        //Функция для проверки валидности номера телефона
+        func isValidPhoneNumber(phoneNumber: String) -> Bool {
+            let digitWithPlusPattern = "^[+]?[0-9]{11}$"
+            let regex = try? NSRegularExpression(pattern: digitWithPlusPattern)
+            let matches = regex?.numberOfMatches(in: phoneNumber, range: NSRange(location: 0, length: phoneNumber.utf16.count))
+            return matches == 1
+        }
         
     }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        storage = ContactStorage()
+        loadContacts()
+
         // Do any additional setup after loading the view.
     }
-}
 
+    private func loadContacts() {
+        contacts = storage.load()
+    }
+}
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return contacts.count
@@ -135,5 +165,8 @@ extension ViewController: UITableViewDelegate {
         // формируем экземпляр, описывающий доступные действия
         let actions = UISwipeActionsConfiguration(actions: [actionDelete, actionEdit])
         return actions
+
     }
 }
+
+
